@@ -1,7 +1,7 @@
 const path = require('path');
 const express = require('express');
 const config = require('./.config');
-const TOKEN = config.token;
+const TOKEN = config.TOKEN;
 const axios = require('axios').default;
 const _ = require('underscore');
 const multer = require('multer');
@@ -95,6 +95,34 @@ app.get('/detailState/*', async (req, res) => {
     res.send(err);
   }
 });
+
+//FOR QUESTIONS & ANSWERS SERVICE
+app.all('/api/qa/*', (req, res) => {
+  let base = config.QUESTIONS;
+  let method = req.method;
+  let url = req.url.substring(4);
+  let query = req.query;
+
+  base += url;
+  console.log(base);
+  let options = {
+    method: req.method,
+    url: base,
+    // headers: { Authorization: TOKEN }, only for heroku
+    data: req.body,
+  };
+
+  axios(options)
+    .then((results) => {
+      // console.log('IN HERE', results.data);
+      // console.log('======================');
+      res.status(results.status).send(results.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
 // Router handler for processing api endpoints
 app.all('/api/*', (req, res) => {
   let base = 'https://app-hrsei-api.herokuapp.com/api/fec2/hr-rpp';
