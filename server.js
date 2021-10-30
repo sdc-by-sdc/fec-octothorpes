@@ -45,13 +45,12 @@ const s3 = new AWS.S3({
 // router for handling valid products url string
 app.get('/detailState/*', async (req, res) => {
   let base = 'https://app-hrsei-api.herokuapp.com/api/fec2/hr-rpp';
-  console.log(req.url, req.params);
+  // console.log(req.url, req.params);
   base += `/${req.params['0']}`;
 
   let indexOfProductId = req.params['0'].indexOf('/');
   let productId = req.params['0'].slice(indexOfProductId + 1);
-
-  console.log('PRODID', req.body);
+  console.log('PRODID', productId);
   let optionsReviews = {
     method: 'GET',
     url: `https://app-hrsei-api.herokuapp.com/api/fec2/hr-rpp/reviews?product_id=${productId}&count=100`,
@@ -65,14 +64,12 @@ app.get('/detailState/*', async (req, res) => {
 
   let optionsDetail = {
     method: req.method,
-    url: base,
-    headers: { Authorization: TOKEN },
+    url: `${config.PRODUCTS}/${productId}`,
     data: req.body,
   };
   let optionsStyle = {
     method: req.method,
-    url: `${base}/styles`,
-    headers: { Authorization: TOKEN },
+    url: `${config.PRODUCTS}/${productId}/styles`,
     data: req.body,
   };
   const detailRequest = axios(optionsDetail);
@@ -94,6 +91,47 @@ app.get('/detailState/*', async (req, res) => {
   } catch (err) {
     res.send(err);
   }
+});
+
+// PRODUCTS ROUTES NOT COVERED
+app.get('/api/products', (req, res) => {
+  const params = req.query;
+  let url = config.PRODUCTS;
+  if (params.page && !params.count) {
+    url += `?page=${params.page}`;
+  } else if (params.page && params.count) {
+    url += `?page=${params.page}&count=${params.count}`;
+  } else if ( !params.page && params.count) {
+    url += `?count=${params.count}`;
+  }
+  console.log(url);
+  const productList = {
+    method: 'GET',
+    url
+  };
+  axios(productList)
+    .then(response => {
+      res.status(200).send(response.data);
+    })
+    .catch(error => {
+      res.status(404).send(error);
+    });
+});
+app.get('/api/products/:product_id/related', (req, res) => {
+  const productId = req.params['product_id'];
+  const relatedProducts = {
+    method: 'GET',
+    url: `${config.PRODUCTS}/${productId}/related`
+  };
+  axios(relatedProducts)
+    .then(response => {
+      console.log('connecting to service');
+      res.status(200).send(response.data);
+    })
+    .catch(error => {
+      console.log('didnt connect');
+      res.status(404).send(error);
+    });
 });
 
 //FOR QUESTIONS & ANSWERS SERVICE
