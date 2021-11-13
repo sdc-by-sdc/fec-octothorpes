@@ -53,13 +53,11 @@ app.get('/detailState/*', async (req, res) => {
   console.log('PRODID', productId);
   let optionsReviews = {
     method: 'GET',
-    url: `https://app-hrsei-api.herokuapp.com/api/fec2/hr-rpp/reviews?product_id=${productId}&count=100`,
-    headers: { Authorization: TOKEN },
+    url: `${config.REVIEWS}/reviews?product_id=${productId}&count=100`
   };
   let optionsReviewsMeta = {
     method: 'GET',
-    url: `https://app-hrsei-api.herokuapp.com/api/fec2/hr-rpp/reviews/meta?product_id=${productId}`,
-    headers: { Authorization: TOKEN },
+    url: `${config.REVIEWS}/reviews/meta?product_id=${productId}`
   };
 
   let optionsDetail = {
@@ -92,6 +90,65 @@ app.get('/detailState/*', async (req, res) => {
     res.send(err);
   }
 });
+
+// REVIEWS ROUTES NOT COVERED
+// report review
+app.put('/api/reviews/*/report', (req, res) => {
+  let reviewId = req.url.substring(4).split('/')[2];
+  let apiEndpoint = `${config.REVIEWS}/reviews/${reviewId}/report`
+
+  let options = {
+    method: 'PUT',
+    url: apiEndpoint
+  };
+
+  axios(options)
+    .then((results) => {
+      res.status(results.status).send();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+// mark review helpful
+app.put('/api/reviews/*/helpful', (req, res) => {
+  let reviewId = req.url.substring(4).split('/')[2];
+  let apiEndpoint = `${config.REVIEWS}/reviews/${reviewId}/helpful`
+
+  let options = {
+    method: 'PUT',
+    url: apiEndpoint
+  };
+
+  axios(options)
+    .then((results) => {
+      res.status(results.status).send();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
+// post new review
+app.post('/api/reviews', (req, res) => {
+  let apiEndpoint = `${config.REVIEWS}/reviews`;
+
+  axios({
+    method: 'POST',
+    url: apiEndpoint,
+    data: req.body
+  })
+    .then((status) => {
+      console.log('success');
+      res.status(status).send();
+    })
+    .catch((error) => {
+      res.status(400).send();
+    })
+})
+
+
 
 // PRODUCTS ROUTES NOT COVERED
 app.get('/api/products', (req, res) => {
